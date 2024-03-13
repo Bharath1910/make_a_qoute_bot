@@ -1,0 +1,21 @@
+{
+	"boilerplate code for commands": {
+    "prefix": "bpc",
+    "body": [
+      "import { type ChatInputCommandInteraction, SlashCommandBuilder, type HexColorString } from 'discord.js'",
+      "import { type CustomClient } from '../../typings'",
+      "import { EmbedBuilder } from 'discord.js'",
+      "",
+      "export const data = new SlashCommandBuilder()",
+      "  .setName('${TM_DIRECTORY/.*\\/(.*)/$1/}')",
+      "",
+      "export async function execute (",
+      "  client: CustomClient,",
+      "  interaction: ChatInputCommandInteraction",
+      "): Promise<void> {",
+      "  $1",
+      "}"
+    ],
+    "description": "boilerplate code for commands"
+  }
+}
