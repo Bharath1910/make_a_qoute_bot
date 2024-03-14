@@ -14,13 +14,19 @@ interface Command {
 }
 
 export const execute = async function main (client: CustomClient): Promise<void> {
-  if (DISCORD_CLIENT_ID === undefined || GUILD_ID === undefined || DISCORD_TOKEN === undefined) {
+  if (
+    DISCORD_CLIENT_ID === undefined 
+    || GUILD_ID === undefined 
+    || DISCORD_TOKEN === undefined
+  ) {
     console.error('Missing env variables')
     return
   }
 
   const commands: object[] = []
-  const commandDir = await fs.readdir(path.join(__dirname, '..', '..', 'commands'))
+  const commandDir = await fs.readdir(path.join(
+    __dirname, '..', '..', 'commands'
+  ))
 
   for (const dir of commandDir) {
     const command: Command = await import(path.join(__dirname, '..', '..', 'commands', dir, 'index'))
@@ -38,7 +44,10 @@ export const execute = async function main (client: CustomClient): Promise<void>
     console.log('Started refreshing application (/) commands.')
 
     await rest.put(
-      Routes.applicationGuildCommands(DISCORD_CLIENT_ID, GUILD_ID),
+      Routes.applicationGuildCommands(
+        DISCORD_CLIENT_ID,
+        GUILD_ID
+      ),
       { body: commands }
     )
 
