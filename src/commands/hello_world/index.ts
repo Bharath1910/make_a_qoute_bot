@@ -10,5 +10,5 @@ export async function execute (
 	client: CustomClient,
 	interaction: ChatInputCommandInteraction
 ): Promise<void> {
-	interaction.reply( {content: 'Hello, world!'});
+	await client.handleSubcommands(client, interaction, __dirname)
 }
