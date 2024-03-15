@@ -1,7 +1,7 @@
 import { REST, Routes } from 'discord.js'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import type { SlashCommandBuilder } from 'discord.js'
+import type { SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js'
 import * as dotenv from 'dotenv'
 import type { CustomClient } from '../../typings'
 
@@ -10,6 +10,11 @@ const { DISCORD_CLIENT_ID, GUILD_ID, DISCORD_TOKEN } = process.env
 
 interface Command {
   data?: SlashCommandBuilder
+  execute?: (interaction: any) => Promise<void>
+}
+
+interface Subcommand {
+  data?: SlashCommandSubcommandBuilder
   execute?: (interaction: any) => Promise<void>
 }
 
@@ -29,10 +34,38 @@ export const execute = async function main (client: CustomClient): Promise<void>
   ))
 
   for (const dir of commandDir) {
+    const subcommands: SlashCommandSubcommandBuilder[] = []
+    try {
+      await fs.access(path.join(__dirname, '..', '..', 'commands', dir, 'subcommands'))
+
+      const subCommandDir = await fs.readdir(path.join(
+        __dirname, '..', '..', 'commands', dir, 'subcommands'
+      ))
+
+      for (const subcommand of subCommandDir) {
+        if (subcommand === 'index.ts' || subcommand === 'index.js') continue
+        const command: Subcommand = await import(path.join(__dirname, '..', '..', 'commands', dir, 'subcommands', subcommand))
+        if (command.data === undefined || command.execute === undefined) {
+          console.warn(`Command ${subcommand} doesnt have data or execute`)
+          return
+        }
+
+        subcommands.push(command.data)
+      }
+    } catch (err) {
+      console.warn(`Command ${dir} doesnt have subcommands`)
+    }
+
     const command: Command = await import(path.join(__dirname, '..', '..', 'commands', dir, 'index'))
     if (command.data === undefined || command.execute === undefined) {
       console.warn(`Command ${dir} doesnt have data or execute`)
       return
+    }
+
+    if (subcommands.length > 0) {
+      for (const subcommand of subcommands) {
+        command.data.addSubcommand(subcommand)
+      }
     }
 
     commands.push(command.data.toJSON())
