@@ -1,10 +1,9 @@
 {
 	"boilerplate code for commands": {
-    "prefix": "bpc",
+    "prefix": "c",
     "body": [
-      "import { type ChatInputCommandInteraction, SlashCommandBuilder, type HexColorString } from 'discord.js'",
+      "import { type ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'",
       "import { type CustomClient } from '../../typings'",
-      "import { EmbedBuilder } from 'discord.js'",
       "",
       "export const data = new SlashCommandBuilder()",
       "  .setName('${TM_DIRECTORY/.*\\/(.*)/$1/}')",
@@ -13,6 +12,7 @@
       "  client: CustomClient,",
       "  interaction: ChatInputCommandInteraction",
       "): Promise<void> {",
+      "  await client.handleSubcommands(client, interaction, __dirname)",
       "  $1",
       "}"
     ],
