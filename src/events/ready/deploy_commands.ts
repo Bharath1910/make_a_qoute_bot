@@ -35,25 +35,18 @@ export const execute = async function main (client: CustomClient): Promise<void>
 
   for (const dir of commandDir) {
     const subcommands: SlashCommandSubcommandBuilder[] = []
-    try {
-      await fs.access(path.join(__dirname, '..', '..', 'commands', dir, 'subcommands'))
+    const subcommandDir = await fs.readdir(path.join(
+      __dirname, '..', '..', 'commands', dir
+    ))
 
-      const subCommandDir = await fs.readdir(path.join(
-        __dirname, '..', '..', 'commands', dir, 'subcommands'
-      ))
-
-      for (const subcommand of subCommandDir) {
-        if (subcommand === 'index.ts' || subcommand === 'index.js') continue
-        const command: Subcommand = await import(path.join(__dirname, '..', '..', 'commands', dir, 'subcommands', subcommand))
-        if (command.data === undefined || command.execute === undefined) {
-          console.warn(`Command ${subcommand} doesnt have data or execute`)
-          return
-        }
-
-        subcommands.push(command.data)
+    for (const subDir of subcommandDir) {
+      if (!(await fs.stat(path.join(__dirname, '..', '..', 'commands', dir, subDir))).isDirectory()) continue
+      const subCommand: Subcommand = await import(path.join(__dirname, '..', '..', 'commands', dir, subDir, 'index'))
+      if (subCommand.data === undefined || subCommand.execute === undefined) {
+        console.warn(`Subcommand ${subDir} doesnt have data or execute`)
+        continue
       }
-    } catch (err) {
-      console.warn(`Command ${dir} doesnt have subcommands`)
+      subcommands.push(subCommand.data)
     }
 
     const command: Command = await import(path.join(__dirname, '..', '..', 'commands', dir, 'index'))
