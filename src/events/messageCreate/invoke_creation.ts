@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { CustomClient } from "../../typings";
-import { EmbedBuilder } from "discord.js";
+import makeQoute from "../../utils/make_qoute";
 
 export async function execute(
 	client: CustomClient,
@@ -16,7 +16,15 @@ export async function execute(
 	}
 
 	const { username, avatar, id } = message.mentions.repliedUser
-	const avatarURL = `https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=4096`
-	
+	const avatarURL = `https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=1024`
+	const repliedTo = await message.fetchReference()
+
+	const image = await makeQoute(avatarURL, repliedTo.content, username)
+	await message.reply({
+		files: [{
+			attachment: image,
+			name: "qoute.png"
+		}]
+	})
 	return;
 }
